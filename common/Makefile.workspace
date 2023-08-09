@@ -101,11 +101,24 @@ app: $(APPLDIR) prepare-obj-folder
 
 endif
 
+ifdef new
+new:
+	@./scripts/ev3rt-new.sh $(new)
+endif
+
+ifdef dest
+dest:
+	@cmd.exe /c "call ./scripts/ev3rt-deploy.bat $(dest)"
+endif
+
+
 usage:
 	@echo make img="<folder>"
 	@echo make app="<folder>"
 	@echo "make upload [ip=<ev3_ip_address>] [from=<local_file_name>] [to=<remote_file_name>]"
 	@echo "make uploadimg [ip=<ev3_ip_address>] [from=<local_image_path>]"
+	@echo make new="name"
+	@echo make dest="driveletter"
 
 # TODO: check file name carefully
 ifndef ip # Default IP
