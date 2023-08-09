@@ -1,0 +1,3 @@
+[submodule "workspace/scripts"]
+	path = workspace/scripts
+	url = https://github.com/PeterHusman/EV3RTProjectTemplate
