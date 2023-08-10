@@ -93,7 +93,11 @@ ifdef app
 
 include $(APPLDIR)/Makefile.inc
 
+ifdef noclean
+app: $(APPLDIR)
+else
 app: $(APPLDIR) prepare-obj-folder
+endif
 	@cd $(OBJDIR) && \
 	make module_cfg.h && \
 	make -j8 && \
@@ -114,7 +118,7 @@ endif
 
 usage:
 	@echo make img="<folder>"
-	@echo make app="<folder>"
+	@echo make [noclean=1] app="<folder>"
 	@echo "make upload [ip=<ev3_ip_address>] [from=<local_file_name>] [to=<remote_file_name>]"
 	@echo "make uploadimg [ip=<ev3_ip_address>] [from=<local_image_path>]"
 	@echo make new="name"
