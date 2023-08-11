@@ -93,11 +93,7 @@ ifdef app
 
 include $(APPLDIR)/Makefile.inc
 
-ifdef noclean
-app: $(APPLDIR)
-else
 app: $(APPLDIR) prepare-obj-folder
-endif
 	@cd $(OBJDIR) && \
 	make module_cfg.h && \
 	make -j8 && \
@@ -107,12 +103,12 @@ endif
 
 ifdef new
 new:
-	@./scripts/ev3rt-new.sh $(new)
+	@./project/ev3rt-new.sh $(new)
 endif
 
 ifdef dest
 dest:
-	@cmd.exe /c "call ./scripts/ev3rt-deploy.bat $(dest)"
+	@cmd.exe /c "call ./project/ev3rt-deploy.bat $(dest)"
 endif
 
 
@@ -121,8 +117,9 @@ usage:
 	@echo make [noclean=1] app="<folder>"
 	@echo "make upload [ip=<ev3_ip_address>] [from=<local_file_name>] [to=<remote_file_name>]"
 	@echo "make uploadimg [ip=<ev3_ip_address>] [from=<local_image_path>]"
-	@echo make new="name"
-	@echo make dest="driveletter"
+	@echo make new="<name>"
+	@echo make dest="<driveletter>"
+
 
 # TODO: check file name carefully
 ifndef ip # Default IP
@@ -165,6 +162,23 @@ temp_mkfilename := .ev3rt_temp_Makefile
 ifdef app
 configure_copts := -DBUILD_MODULE
 endif
+ifdef noclean
+prepare-obj-folder:
+	@cp $(MKFILE_DIR)/$(MKFILENAME) $(APPLDIR)/$(temp_mkfilename)
+	@mkdir -p $(OBJDIR)
+	cd $(OBJDIR) && \
+	rm app.c app.h app.cfg && \
+	$(KERNELDIR)/configure -T ev3_gcc -A app \
+		-a $(call get_relpath,$(APPLDIR),$(OBJDIR)) \
+		-t $(call get_relpath,$(APPLDIR),$(OBJDIR)) \
+		-D $(call get_relpath,$(KERNELDIR),$(OBJDIR)) \
+		-L $(call get_relpath,$(LIBKERNELDIR),$(OBJDIR)) \
+		-l $(SRCLANG) \
+		-m $(temp_mkfilename) -o "$(configure_copts)" \
+		-U "$(APPLOBJS)" && \
+		rm $(APPLDIR)/$(temp_mkfilename) && \
+		mv $(temp_mkfilename) Makefile
+else
 prepare-obj-folder: clean
 	@cp $(MKFILE_DIR)/$(MKFILENAME) $(APPLDIR)/$(temp_mkfilename)
 	@mkdir -p $(OBJDIR)
@@ -180,7 +194,7 @@ prepare-obj-folder: clean
 	rm $(APPLDIR)/$(temp_mkfilename) && \
 	mv $(temp_mkfilename) Makefile && \
 	make clean
+endif
 
 
 .PHONY: clean realclean prepare-obj-folder img app
-
