@@ -103,12 +103,12 @@ endif
 
 ifdef new
 new:
-	@./project/ev3rt-new.sh $(new)
+	@./scripts/ev3rt-new.sh $(new)
 endif
 
 ifdef dest
 dest:
-	@cmd.exe /c "call ./project/ev3rt-deploy.bat $(dest)"
+	@cmd.exe /c "call ./scripts/ev3rt-deploy.bat $(dest)"
 endif
 
 
