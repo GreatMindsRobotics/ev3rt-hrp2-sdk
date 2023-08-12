@@ -121,6 +121,15 @@ ER ev3_sensor_config(sensor_port_t port, sensor_type_t type);
  */
 ER_UINT ev3_sensor_get_type(sensor_port_t port);
 
+typedef enum {
+	COL_REFLECT = 0,
+	COL_AMBIENT = 1,
+	COL_COLOR   = 2,
+	COL_RGBRAW  = 4,
+} COLOR_SENSOR_MODES;
+
+void ev3_color_sensor_set_mode(sensor_port_t port, COLOR_SENSOR_MODES mode);
+
 /**
  * \~English
  * \brief 	   Get the color by a color sensor.
@@ -180,6 +189,8 @@ uint8_t ev3_color_sensor_get_ambient(sensor_port_t port);
  * \param val   取得した値を格納する変数のポインタ
  */
 void ev3_color_sensor_get_rgb_raw(sensor_port_t port, rgb_raw_t *val);
+
+void ev3_color_sensor_get_rgb_raw_no_mode_switch(sensor_port_t port, rgb_raw_t *val);
 
 /**
  * \~English

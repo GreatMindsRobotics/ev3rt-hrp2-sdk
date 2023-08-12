@@ -64,6 +64,20 @@ void uart_sensor_fetch_data(sensor_port_t port, uint8_t mode, void *dest, SIZE s
 	}
 }
 
+static
+void uart_sensor_fetch_data_no_mode_switch(sensor_port_t port, void *dest, SIZE size) {
+	ER ercd;
+//	while(!uart_sensor_data_ready(port));
+	while(!((*pUartSensorData[port].status) & UART_DATA_READY)); // TODO: time out
+
+	// Copy data
+	if (size > 0) {
+		void *raw = (void*)(pUartSensorData[port].raw[*pUartSensorData[port].actual]); // TODO: check this, discard volatile
+		memcpy(dest, raw, size);
+//		memcpy(dest, (void*)uart_sensor_get_raw(port), size);
+	}
+}
+
 void _initialize_ev3api_sensor() {
 	// TODO: Thread safe
 	if (pUartSensorData == NULL) {
@@ -148,12 +162,17 @@ error_exit:
 	return ercd;
 }
 
-typedef enum {
-	COL_REFLECT = 0,
-	COL_AMBIENT = 1,
-	COL_COLOR   = 2,
-	COL_RGBRAW  = 4,
-} COLOR_SENSOR_MODES;
+void ev3_color_sensor_set_mode(sensor_port_t port, COLOR_SENSOR_MODES mode) {
+	ER ercd;
+	CHECK_PORT(port);
+	CHECK_COND(ev3_sensor_get_type(port) == COLOR_SENSOR, E_OBJ);
+
+	uart_sensor_fetch_data(port, mode, NULL, 0);
+	return;
+
+error_exit:
+	syslog(LOG_WARNING, "%s(): ercd %d", __FUNCTION__, ercd);
+}
 
 colorid_t ev3_color_sensor_get_color(sensor_port_t port) {
 	ER ercd;
@@ -202,6 +221,21 @@ uint8_t ev3_color_sensor_get_ambient(sensor_port_t port) {
 error_exit:
     syslog(LOG_WARNING, "%s(): ercd %d", __FUNCTION__, ercd);
     return 0;
+}
+
+void ev3_color_sensor_get_rgb_raw_no_mode_switch(sensor_port_t port, rgb_raw_t *val) {
+	ER ercd;
+
+//	lazy_initialize();
+	CHECK_PORT(port);
+	CHECK_COND(ev3_sensor_get_type(port) == COLOR_SENSOR, E_OBJ);
+
+	uart_sensor_fetch_data_no_mode_switch(port, val, sizeof(rgb_raw_t));
+
+    return;
+
+error_exit:
+    syslog(LOG_WARNING, "%s(): ercd %d", __FUNCTION__, ercd);
 }
 
 void ev3_color_sensor_get_rgb_raw(sensor_port_t port, rgb_raw_t *val) {
