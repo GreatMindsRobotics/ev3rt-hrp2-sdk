@@ -66,7 +66,6 @@ void uart_sensor_fetch_data(sensor_port_t port, uint8_t mode, void *dest, SIZE s
 
 static
 void uart_sensor_fetch_data_no_mode_switch(sensor_port_t port, void *dest, SIZE size) {
-	ER ercd;
 //	while(!uart_sensor_data_ready(port));
 	while(!((*pUartSensorData[port].status) & UART_DATA_READY)); // TODO: time out
 
